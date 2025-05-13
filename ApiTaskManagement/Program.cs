@@ -11,6 +11,7 @@ using ApiTaskManagement.BL.Interfaces;
 using ApiTaskManagement.Middleware;
 using ApiTaskManagement.Services;
 using ApiTaskManagement.Services.Interfaces;
+using Microsoft.OpenApi.Models;
 
 namespace ApiTaskManagement
 {
@@ -34,6 +35,35 @@ namespace ApiTaskManagement
             builder.Services.AddAutoMapper(typeof(Program));
 
             builder.Services.AddFirebaseAuthentication(builder.Configuration);
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Tu API", Version = "v1" });
+
+                // Configura JWT Authentication
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Description = "Introduce tu token JWT de Firebase con el formato: Bearer {tu token}",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+            });
+
 
             var app = builder.Build();
 
