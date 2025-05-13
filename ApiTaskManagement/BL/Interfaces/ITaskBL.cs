@@ -5,11 +5,11 @@
 
     public interface ITaskBL
     {
-        Task<IEnumerable<TaskResponseDTO>> GetAllAsync(string userId);
-        Task<TaskResponseDTO?> GetByIdAsync(int id, string userId);
+        Task<IEnumerable<TaskResponseDTO>> GetAllAsync();
+        Task<TaskResponseDTO?> GetByIdAsync(int id);
         Task<bool> CreateAsync(TaskEntity task);
         Task<bool> UpdateAsync(TaskEntity task);
-        Task<bool> DeleteAsync(int id, string userId);
+        Task<bool> DeleteAsync(int id);
     }
 
 }

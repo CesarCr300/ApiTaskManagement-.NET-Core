@@ -10,21 +10,23 @@ namespace ApiTaskManagement.BL
     {
         private readonly ITaskRepository _repo;
         private readonly ITaskService _service;
+        private readonly ICurrentUserService _currentUser;
 
-        public TaskBL(ITaskRepository repo, ITaskService taskService)
+        public TaskBL(ITaskRepository repo, ITaskService taskService, ICurrentUserService currentUserService)
         {
             _repo = repo;
             _service = taskService;
+            _currentUser = currentUserService;
         }
 
-        public Task<IEnumerable<TaskResponseDTO>> GetAllAsync(string userId)
+        public Task<IEnumerable<TaskResponseDTO>> GetAllAsync()
         {
-            return _service.GetTasksByUserAsync(userId);
+            return _service.GetTasksByUserAsync(_currentUser.UserId);
         }
 
-        public Task<TaskResponseDTO?> GetByIdAsync(int id, string userId)
+        public Task<TaskResponseDTO?> GetByIdAsync(int id)
         {
-            return _service.GetByIdAsync(id, userId);
+            return _service.GetByIdAsync(id, _currentUser.UserId);
         }
 
         public Task<bool> CreateAsync(TaskEntity task)
@@ -37,9 +39,9 @@ namespace ApiTaskManagement.BL
             return _repo.UpdateAsync(task);
         }
 
-        public Task<bool> DeleteAsync(int id, string userId)
+        public Task<bool> DeleteAsync(int id)
         {
-            return _repo.DeleteAsync(id, userId);
+            return _repo.DeleteAsync(id, _currentUser.UserId);
         }
     }
 

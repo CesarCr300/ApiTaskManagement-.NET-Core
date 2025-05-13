@@ -22,21 +22,17 @@ public class TaskController : ControllerBase
         _mapper = mapper;
     }
 
-    private string GetUserId() => User.FindFirstValue("user_id") ?? throw new UnauthorizedAccessException();
-
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var userId = GetUserId();
-        var tasks = await _taskBL.GetAllAsync(userId);
+        var tasks = await _taskBL.GetAllAsync();
         return Ok(ResponseHandler.Success(tasks));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var userId = GetUserId();
-        var task = await _taskBL.GetByIdAsync(id, userId);
+        var task = await _taskBL.GetByIdAsync(id);
         if (task == null)
             return NotFound(ResponseHandler.Error("Task not found", 404));
 
@@ -46,9 +42,7 @@ public class TaskController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TaskCreateDTO dto)
     {
-        var userId = GetUserId();
         var entity = _mapper.Map<TaskEntity>(dto);
-        entity.UserId = userId;
 
         var success = await _taskBL.CreateAsync(entity);
         return Ok(ResponseHandler.Success(message: success ? "Created" : "Failed"));
@@ -57,8 +51,7 @@ public class TaskController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] TaskUpdateDTO dto)
     {
-        var userId = GetUserId();
-        //var existing = await _taskBL.GetByIdAsync(id, userId);
+        //var existing = await _taskBL.GetByIdAsync(id);
         //if (existing == null)
         //    return NotFound(ResponseHandler.Error("Task not found", 404));
 
@@ -71,8 +64,7 @@ public class TaskController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var userId = GetUserId();
-        var success = await _taskBL.DeleteAsync(id, userId);
+        var success = await _taskBL.DeleteAsync(id);
         if (!success)
             return NotFound(ResponseHandler.Error("Task not found or unauthorized", 404));
 
