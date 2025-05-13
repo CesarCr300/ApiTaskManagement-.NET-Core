@@ -11,15 +11,9 @@ namespace ApiTaskManagement.Database.EntityConfiguration
             builder.ToTable("tbl_task_state");
 
             builder.HasKey(s => s.Id);
-
-            builder.Property(s => s.Id)
-                .HasColumnName("id")
-                .ValueGeneratedOnAdd();
-
-            builder.Property(s => s.Name)
-                .HasColumnName("name")
-                .IsRequired()
-                .HasMaxLength(255);
+            builder.Property(s => s.Id).HasColumnName("id");
+            builder.Property(s => s.Name).IsRequired().HasMaxLength(255).HasColumnName("name");
         }
     }
+
 }

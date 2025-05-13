@@ -1,63 +1,57 @@
 using ApiTaskManagement.Database;
 using ApiTaskManagement.Entities;
 using Microsoft.EntityFrameworkCore;
+using ApiTaskManagement.Repositories.Interfaces;
 
 namespace ApiTaskManagement.Repositories
 {
     public class TaskRepository : ITaskRepository
     {
-        private readonly TaskManagementDbContext _dbContext;
+        private readonly TaskManagementDbContext _context;
 
-        public TaskRepository(TaskManagementDbContext dbContext)
+        public TaskRepository(TaskManagementDbContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
-        public async Task<IEnumerable<TaskEntity>> GetAllAsync()
+        public async Task<IEnumerable<TaskEntity>> GetAllAsync(string userId)
         {
-            return await _dbContext.Tasks
+            return await _context.Tasks
+                .FromSqlRaw("SELECT * FROM sp_get_tasks_by_user({0})", userId)
                 .Include(t => t.Priority)
                 .Include(t => t.State)
                 .ToListAsync();
         }
-
-        public async Task<TaskEntity?> GetByIdAsync(int id)
+        public async Task<TaskEntity?> GetByIdAsync(int id, string userId)
         {
-            return await _dbContext.Tasks
+            return await _context.Tasks
+                .FromSqlRaw("SELECT * FROM sp_get_task_by_id_and_user({0}, {1})", id, userId)
                 .Include(t => t.Priority)
                 .Include(t => t.State)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .FirstOrDefaultAsync();
         }
 
-        public async Task AddAsync(TaskEntity task)
+        public async Task<bool> CreateAsync(TaskEntity task)
         {
-            await _dbContext.Tasks.AddAsync(task);
-            await _dbContext.SaveChangesAsync();
+            // Aquí debería invocar un procedimiento almacenado
+            _context.Tasks.Add(task);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task UpdateAsync(TaskEntity task)
+        public async Task<bool> UpdateAsync(TaskEntity task)
         {
-            _dbContext.Tasks.Update(task);
-            await _dbContext.SaveChangesAsync();
+            _context.Tasks.Update(task);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id, string userId)
         {
-            var task = await GetByIdAsync(id);
-            if (task != null)
-            {
-                _dbContext.Tasks.Remove(task);
-                await _dbContext.SaveChangesAsync();
-            }
+            var task = await GetByIdAsync(id, userId);
+            if (task == null) return false;
+
+            _context.Tasks.Remove(task);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 
-    public interface ITaskRepository
-    {
-        Task<IEnumerable<TaskEntity>> GetAllAsync();
-        Task<TaskEntity?> GetByIdAsync(int id);
-        Task AddAsync(TaskEntity task);
-        Task UpdateAsync(TaskEntity task);
-        Task DeleteAsync(int id);
-    }
 }

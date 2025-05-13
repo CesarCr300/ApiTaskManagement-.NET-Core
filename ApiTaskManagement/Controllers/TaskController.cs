@@ -1,59 +1,81 @@
-using ApiTaskManagement.BL;
-using ApiTaskManagement.Entities;
+namespace ApiTaskManagement.Controllers;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using ApiTaskManagement.BL.Interfaces;
+using ApiTaskManagement.DTOs;
+using ApiTaskManagement.Entities;
+using ApiTaskManagement.Utils;
 
-namespace ApiTaskManagement.Controllers
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class TaskController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TaskController : ControllerBase
+    private readonly ITaskBL _taskBL;
+    private readonly IMapper _mapper;
+
+    public TaskController(ITaskBL taskBL, IMapper mapper)
     {
-        private readonly ITaskBL _taskBL;
+        _taskBL = taskBL;
+        _mapper = mapper;
+    }
 
-        public TaskController(ITaskBL taskBL)
-        {
-            _taskBL = taskBL;
-        }
+    private string GetUserId() => User.FindFirstValue("user_id") ?? throw new UnauthorizedAccessException();
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var tasks = await _taskBL.GetAllTasksAsync();
-            return Ok(tasks);
-        }
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var userId = GetUserId();
+        var tasks = await _taskBL.GetAllAsync(userId);
+        return Ok(ResponseHandler.Success(tasks));
+    }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var task = await _taskBL.GetTaskByIdAsync(id);
-            if (task == null)
-                return NotFound();
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var userId = GetUserId();
+        var task = await _taskBL.GetByIdAsync(id, userId);
+        if (task == null)
+            return NotFound(ResponseHandler.Error("Task not found", 404));
 
-            return Ok(task);
-        }
+        return Ok(ResponseHandler.Success(task));
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TaskEntity task)
-        {
-            await _taskBL.CreateTaskAsync(task);
-            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
-        }
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] TaskCreateDTO dto)
+    {
+        var userId = GetUserId();
+        var entity = _mapper.Map<TaskEntity>(dto);
+        entity.UserId = userId;
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TaskEntity task)
-        {
-            if (id != task.Id)
-                return BadRequest("Task ID mismatch");
+        var success = await _taskBL.CreateAsync(entity);
+        return Ok(ResponseHandler.Success(message: success ? "Created" : "Failed"));
+    }
 
-            await _taskBL.UpdateTaskAsync(task);
-            return NoContent();
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] TaskUpdateDTO dto)
+    {
+        var userId = GetUserId();
+        //var existing = await _taskBL.GetByIdAsync(id, userId);
+        //if (existing == null)
+        //    return NotFound(ResponseHandler.Error("Task not found", 404));
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _taskBL.DeleteTaskAsync(id);
-            return NoContent();
-        }
+        //_mapper.Map(dto, existing);
+        //var success = await _taskBL.UpdateAsync(existing);
+        var success = true;
+        return Ok(ResponseHandler.Success(message: success ? "Updated" : "Failed"));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var userId = GetUserId();
+        var success = await _taskBL.DeleteAsync(id, userId);
+        if (!success)
+            return NotFound(ResponseHandler.Error("Task not found or unauthorized", 404));
+
+        return Ok(ResponseHandler.Success(message: "Deleted"));
     }
 }

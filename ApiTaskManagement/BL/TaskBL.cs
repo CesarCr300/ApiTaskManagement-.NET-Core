@@ -1,49 +1,46 @@
 using ApiTaskManagement.Entities;
-using ApiTaskManagement.Repositories;
+using ApiTaskManagement.BL.Interfaces;
+using ApiTaskManagement.Repositories.Interfaces;
+using ApiTaskManagement.Services.Interfaces;
+using ApiTaskManagement.DTOs;
 
 namespace ApiTaskManagement.BL
 {
     public class TaskBL : ITaskBL
     {
-        private readonly ITaskRepository _taskRepository;
+        private readonly ITaskRepository _repo;
+        private readonly ITaskService _service;
 
-        public TaskBL(ITaskRepository taskRepository)
+        public TaskBL(ITaskRepository repo, ITaskService taskService)
         {
-            _taskRepository = taskRepository;
+            _repo = repo;
+            _service = taskService;
         }
 
-        public async Task<IEnumerable<TaskEntity>> GetAllTasksAsync()
+        public Task<IEnumerable<TaskResponseDTO>> GetAllAsync(string userId)
         {
-            return await _taskRepository.GetAllAsync();
+            return _service.GetTasksByUserAsync(userId);
         }
 
-        public async Task<TaskEntity?> GetTaskByIdAsync(int id)
+        public Task<TaskResponseDTO?> GetByIdAsync(int id, string userId)
         {
-            return await _taskRepository.GetByIdAsync(id);
+            return _service.GetByIdAsync(id, userId);
         }
 
-        public async Task CreateTaskAsync(TaskEntity task)
+        public Task<bool> CreateAsync(TaskEntity task)
         {
-            await _taskRepository.AddAsync(task);
+            return _repo.CreateAsync(task);
         }
 
-        public async Task UpdateTaskAsync(TaskEntity task)
+        public Task<bool> UpdateAsync(TaskEntity task)
         {
-            await _taskRepository.UpdateAsync(task);
+            return _repo.UpdateAsync(task);
         }
 
-        public async Task DeleteTaskAsync(int id)
+        public Task<bool> DeleteAsync(int id, string userId)
         {
-            await _taskRepository.DeleteAsync(id);
+            return _repo.DeleteAsync(id, userId);
         }
     }
 
-    public interface ITaskBL
-    {
-        Task<IEnumerable<TaskEntity>> GetAllTasksAsync();
-        Task<TaskEntity?> GetTaskByIdAsync(int id);
-        Task CreateTaskAsync(TaskEntity task);
-        Task UpdateTaskAsync(TaskEntity task);
-        Task DeleteTaskAsync(int id);
-    }
 }

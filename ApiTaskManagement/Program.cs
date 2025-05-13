@@ -1,8 +1,16 @@
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+
 using ApiTaskManagement.Database;
 using ApiTaskManagement.Repositories;
+using ApiTaskManagement.Repositories.Interfaces;
 using ApiTaskManagement.BL;
-using Microsoft.EntityFrameworkCore;
+using ApiTaskManagement.BL.Interfaces;
+using ApiTaskManagement.Middleware;
+using ApiTaskManagement.Services;
+using ApiTaskManagement.Services.Interfaces;
 
 namespace ApiTaskManagement
 {
@@ -21,10 +29,16 @@ namespace ApiTaskManagement
 
             builder.Services.AddScoped<ITaskRepository, TaskRepository>();
             builder.Services.AddScoped<ITaskBL, TaskBL>();
+            builder.Services.AddScoped<ITaskService, TaskService>();
+
+            builder.Services.AddAutoMapper(typeof(Program));
+
+            builder.Services.AddFirebaseAuthentication(builder.Configuration);
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -32,9 +46,8 @@ namespace ApiTaskManagement
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

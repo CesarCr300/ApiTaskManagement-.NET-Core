@@ -6,9 +6,9 @@ public class TaskManagementDbContext : DbContext
 {
     public TaskManagementDbContext(DbContextOptions<TaskManagementDbContext> options) : base(options) { }
 
-    public DbSet<TaskEntity> Tasks { get; set; }
-    public DbSet<TaskPriorityEntity> TaskPriorities { get; set; }
-    public DbSet<TaskStateEntity> TaskStates { get; set; }
+    public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
+    public DbSet<TaskPriorityEntity> TaskPriorities => Set<TaskPriorityEntity>();
+    public DbSet<TaskStateEntity> TaskStates => Set<TaskStateEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
