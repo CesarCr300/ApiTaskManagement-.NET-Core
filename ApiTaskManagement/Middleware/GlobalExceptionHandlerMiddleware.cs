@@ -25,7 +25,6 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception");
 
                 context.Response.ContentType = "application/json";
 
@@ -40,6 +39,7 @@
                 }
                 else
                 {
+                    _logger.LogError(ex, "Unhandled exception");
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     httpStatusCode = (int)HttpStatusCode.InternalServerError;
                     message = "An unexpected error occurred";

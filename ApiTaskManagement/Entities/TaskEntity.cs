@@ -15,6 +15,10 @@ public class TaskEntity
     public TaskPriorityEntity Priority { get; set; } = null!;
     public TaskStateEntity State { get; set; } = null!;
 
+    public void initialize()
+    {
+        if (StateId == TaskStateConstants.Done) DateClose = DateTime.UtcNow;
+    }
 
     public void update(TaskEntity task)
     {

@@ -124,5 +124,37 @@ namespace ApiTaskManagementTests.Entities
             // Assert
             Assert.Null(original.DateClose);
         }
+
+        [Fact]
+        public void Initalize_ShouldNotSetDateClose_WhenStateIsDifferentToDone()
+        {
+            // Arrange
+            var task = new TaskEntity
+            {
+                StateId = TaskStateConstants.Done+1,
+            };
+
+            // Act
+            task.initialize();
+
+            // Assert
+            Assert.Null(task.DateClose);
+        }
+
+        [Fact]
+        public void Initalize_ShouldSetDateClose_WhenStateIsDone()
+        {
+            // Arrange
+            var task = new TaskEntity
+            {
+                StateId = TaskStateConstants.Done,
+            };
+
+            // Act
+            task.initialize();
+
+            // Assert
+            Assert.NotNull(task.DateClose);
+        }
     }
 }
