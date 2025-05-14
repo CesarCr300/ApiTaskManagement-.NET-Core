@@ -16,24 +16,18 @@ namespace ApiTaskManagement.Repositories
 
         public async Task<IEnumerable<TaskEntity>> GetAllAsync(string userId)
         {
-            return await _context.Tasks
-                .FromSqlRaw("SELECT * FROM sp_get_tasks_by_user({0})", userId)
-                .Include(t => t.Priority)
-                .Include(t => t.State)
-                .ToListAsync();
+            return await _context.Tasks.ToListAsync();
         }
         public async Task<TaskEntity?> GetByIdAsync(int id, string userId)
         {
-            return await _context.Tasks
-                .FromSqlRaw("SELECT * FROM sp_get_task_by_id_and_user({0}, {1})", id, userId)
-                .Include(t => t.Priority)
-                .Include(t => t.State)
-                .FirstOrDefaultAsync();
+            var entity = await _context.Tasks.FindAsync(id);
+            if (entity is null) return null;
+            if (!entity.UserId.Equals(userId)) return null;
+            return entity;
         }
 
         public async Task<bool> CreateAsync(TaskEntity task)
         {
-            // Aquí debería invocar un procedimiento almacenado
             _context.Tasks.Add(task);
             return await _context.SaveChangesAsync() > 0;
         }

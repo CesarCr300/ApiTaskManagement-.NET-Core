@@ -2,7 +2,6 @@ namespace ApiTaskManagement.Controllers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using ApiTaskManagement.BL.Interfaces;
 using ApiTaskManagement.DTOs;
 using ApiTaskManagement.Entities;
@@ -51,13 +50,9 @@ public class TaskController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] TaskUpdateDTO dto)
     {
-        //var existing = await _taskBL.GetByIdAsync(id);
-        //if (existing == null)
-        //    return NotFound(ResponseHandler.Error("Task not found", 404));
-
-        //_mapper.Map(dto, existing);
-        //var success = await _taskBL.UpdateAsync(existing);
-        var success = true;
+        var entity = _mapper.Map<TaskEntity>(dto);
+        entity.Id = id;
+        var success = await _taskBL.UpdateAsync(entity);
         return Ok(ResponseHandler.Success(message: success ? "Updated" : "Failed"));
     }
 

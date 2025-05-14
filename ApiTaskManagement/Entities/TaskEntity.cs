@@ -1,4 +1,6 @@
-﻿namespace ApiTaskManagement.Entities;
+﻿using ApiTaskManagement.Constants;
+
+namespace ApiTaskManagement.Entities;
 
 public class TaskEntity
 {
@@ -12,4 +14,24 @@ public class TaskEntity
 
     public TaskPriorityEntity Priority { get; set; } = null!;
     public TaskStateEntity State { get; set; } = null!;
+
+
+    public void update(TaskEntity task)
+    {
+        Title = task.Title;
+        Description = task.Description;
+        PriorityId = task.PriorityId;
+
+        if (task.StateId != StateId)
+        {
+            StateId = task.StateId;
+            if (StateId == 3) DateClose = DateTime.UtcNow;
+            else DateClose = null;
+        }
+
+        if (DateClose is not null)
+        {
+            DateClose = DateClose.Value.ToUniversalTime();
+        }
+    }
 }

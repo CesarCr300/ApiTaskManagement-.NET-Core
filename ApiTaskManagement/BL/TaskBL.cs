@@ -34,9 +34,14 @@ namespace ApiTaskManagement.BL
             return _repo.CreateAsync(task);
         }
 
-        public Task<bool> UpdateAsync(TaskEntity task)
+        public async Task<bool> UpdateAsync(TaskEntity task)
         {
-            return _repo.UpdateAsync(task);
+            var taskEntity = await _repo.GetByIdAsync(task.Id, _currentUser.UserId);
+            if (taskEntity is null) return false;
+
+            taskEntity.update(task);
+
+            return await _repo.UpdateAsync(taskEntity);
         }
 
         public Task<bool> DeleteAsync(int id)
