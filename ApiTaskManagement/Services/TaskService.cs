@@ -22,30 +22,28 @@ namespace ApiTaskManagement.Services
         public async Task<IEnumerable<TaskResponseDTO>> GetTasks(string? from, string? end)
         {
             var userId = _currentUser.UserId;
+            var range = TryParseDateRange(from, end);
 
-            if (DateTime.TryParse(from, out var fromDate) && DateTime.TryParse(end, out var endDate))
+            if (range.HasValue)
             {
-                if (fromDate > endDate)
-                {
-                    throw new HttpException("La fecha fin debe ser mayor o igual a la fecha de inicio.", (int)HttpStatusCode.BadRequest);
-                }
-                endDate = endDate.AddDays(1).AddSeconds(-1);
+                var (fromDate, toDate) = range.Value;
+
                 return await _context
                     .Database
                     .SqlQueryRaw<TaskResponseDTO>(
                         "SELECT * FROM sp_get_task_by_dates_and_user({0}, {1}, {2})",
                         fromDate.ToString("yyyy-MM-dd HH:mm:ss"),
-                        endDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                        toDate.ToString("yyyy-MM-dd HH:mm:ss"),
                         userId)
                     .ToListAsync();
             }
 
             return await _context
                 .Database
-                .SqlQueryRaw<TaskResponseDTO>(
-                    "SELECT * FROM sp_get_tasks_by_user({0})", userId)
+                .SqlQueryRaw<TaskResponseDTO>("SELECT * FROM sp_get_tasks_by_user({0})", userId)
                 .ToListAsync();
         }
+
 
 
         public async Task<TaskResponseDTO?> GetByIdAsync(int id)
@@ -58,5 +56,22 @@ namespace ApiTaskManagement.Services
 
             return result.FirstOrDefault();
         }
+
+        public (DateTime from, DateTime to)? TryParseDateRange(string? from, string? end)
+        {
+            if (DateTime.TryParse(from, out var fromDate) && DateTime.TryParse(end, out var endDate))
+            {
+                if (fromDate > endDate)
+                {
+                    throw new HttpException("La fecha fin debe ser mayor o igual a la fecha de inicio.", 400);
+                }
+
+                endDate = endDate.Date.AddDays(1).AddSeconds(-1); // hasta 23:59:59
+                return (fromDate, endDate);
+            }
+
+            return null;
+        }
+
     }
 }
