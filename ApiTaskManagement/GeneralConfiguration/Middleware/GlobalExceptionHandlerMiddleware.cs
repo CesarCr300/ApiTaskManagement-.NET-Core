@@ -1,4 +1,4 @@
-﻿namespace ApiTaskManagement.Middleware
+﻿namespace ApiTaskManagement.GeneralConfiguration.Middleware
 {
     using System.ComponentModel;
     using System.Net;

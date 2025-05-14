@@ -1,7 +1,7 @@
 ﻿using ApiTaskManagement.DTOs;
 using ApiTaskManagement.Entities;
 using AutoMapper;
-namespace ApiTaskManagement.Mapper
+namespace ApiTaskManagement.GeneralConfiguration.Mapper
 {
     public class MapperProfile : Profile
     {

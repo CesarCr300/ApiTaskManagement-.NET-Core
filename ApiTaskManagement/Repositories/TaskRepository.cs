@@ -1,7 +1,7 @@
-using ApiTaskManagement.Database;
 using ApiTaskManagement.Entities;
 using Microsoft.EntityFrameworkCore;
 using ApiTaskManagement.Repositories.Interfaces;
+using ApiTaskManagement.GeneralConfiguration.Database;
 
 namespace ApiTaskManagement.Repositories
 {

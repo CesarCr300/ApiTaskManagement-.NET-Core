@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
-using ApiTaskManagement.Database;
 using ApiTaskManagement.DTOs;
 using ApiTaskManagement.Services.Interfaces;
 using ApiTaskManagement.Entities;
+using ApiTaskManagement.GeneralConfiguration.Database;
 
 namespace ApiTaskManagement.Services
 {

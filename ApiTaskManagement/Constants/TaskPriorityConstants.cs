@@ -1,6 +1,5 @@
 ﻿namespace ApiTaskManagement.Constants
 {
-    // Constants/TaskPriorityConstants.cs
     public static class TaskPriorityConstants
     {
         public const int Low = 1;

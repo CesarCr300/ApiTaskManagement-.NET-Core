@@ -2,7 +2,7 @@ using ApiTaskManagement.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ApiTaskManagement.Database.EntityConfiguration
+namespace ApiTaskManagement.GeneralConfiguration.Database.EntityConfiguration
 {
     public class TaskStateEntityConfiguration : IEntityTypeConfiguration<TaskStateEntity>
     {

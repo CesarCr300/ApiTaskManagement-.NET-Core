@@ -19,7 +19,7 @@ namespace ApiTaskManagement.BL
 
         public Task<bool> CreateAsync(TaskEntity task)
         {
-            task.initialize();
+            task.initialize(_currentUser.UserId);
             return _repo.CreateAsync(task);
         }
 

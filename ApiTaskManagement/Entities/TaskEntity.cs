@@ -15,8 +15,9 @@ public class TaskEntity
     public TaskPriorityEntity Priority { get; set; } = null!;
     public TaskStateEntity State { get; set; } = null!;
 
-    public void initialize()
+    public void initialize(string userId)
     {
+        UserId = userId;
         if (StateId == TaskStateConstants.Done) DateClose = DateTime.UtcNow;
     }
 

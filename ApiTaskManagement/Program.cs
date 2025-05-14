@@ -2,15 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-
-using ApiTaskManagement.Database;
 using ApiTaskManagement.Repositories;
 using ApiTaskManagement.Repositories.Interfaces;
 using ApiTaskManagement.BL;
 using ApiTaskManagement.BL.Interfaces;
-using ApiTaskManagement.Middleware;
 using ApiTaskManagement.Services;
 using ApiTaskManagement.Services.Interfaces;
+using ApiTaskManagement.GeneralConfiguration.Database;
+using ApiTaskManagement.GeneralConfiguration.Middleware;
 
 namespace ApiTaskManagement
 {

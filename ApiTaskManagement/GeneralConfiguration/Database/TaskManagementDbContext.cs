@@ -1,7 +1,7 @@
 using ApiTaskManagement.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace ApiTaskManagement.Database;
+namespace ApiTaskManagement.GeneralConfiguration.Database;
 public class TaskManagementDbContext : DbContext
 {
     public TaskManagementDbContext(DbContextOptions<TaskManagementDbContext> options) : base(options) { }
