@@ -1,4 +1,5 @@
 ﻿using ApiTaskManagement.Services.Interfaces;
+using ApiTaskManagement.Utils.Exceptions;
 
 namespace ApiTaskManagement.Services
 {
@@ -10,7 +11,7 @@ namespace ApiTaskManagement.Services
         {
             var user = httpContextAccessor.HttpContext?.User;
             UserId = user?.FindFirst("user_id")?.Value
-                     ?? throw new UnauthorizedAccessException("No se pudo obtener el user_id del token.");
+                     ?? throw new UnauthorizedHttpException();
         }
-    }
+}
 }

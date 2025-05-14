@@ -1,8 +1,10 @@
 ﻿namespace ApiTaskManagement.Middleware
 {
+    using System.ComponentModel;
     using System.Net;
     using System.Text.Json;
     using ApiTaskManagement.Utils;
+    using ApiTaskManagement.Utils.Exceptions;
 
     public class GlobalExceptionHandlerMiddleware
     {
@@ -26,9 +28,24 @@
                 _logger.LogError(ex, "Unhandled exception");
 
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var errorResponse = ResponseHandler.Error("An unexpected error occurred", 500);
+                int httpStatusCode;
+                string message;
+
+                if (ex is HttpException httpException)
+                {
+                    context.Response.StatusCode = httpException.StatusCode;
+                    httpStatusCode = httpException.StatusCode;
+                    message = httpException.Message;
+                }
+                else
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    httpStatusCode = (int)HttpStatusCode.InternalServerError;
+                    message = "An unexpected error occurred";
+                }
+
+                var errorResponse = ResponseHandler.Error(message, httpStatusCode);
                 var result = JsonSerializer.Serialize(errorResponse);
 
                 await context.Response.WriteAsync(result);
