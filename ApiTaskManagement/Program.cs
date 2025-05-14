@@ -1,7 +1,7 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 
 using ApiTaskManagement.Database;
 using ApiTaskManagement.Repositories;
@@ -11,7 +11,6 @@ using ApiTaskManagement.BL.Interfaces;
 using ApiTaskManagement.Middleware;
 using ApiTaskManagement.Services;
 using ApiTaskManagement.Services.Interfaces;
-using Microsoft.OpenApi.Models;
 
 namespace ApiTaskManagement
 {
@@ -21,25 +20,49 @@ namespace ApiTaskManagement
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            ConfigureServices(builder);
+            ConfigureSwagger(builder);
+            ConfigureAuthentication(builder);
+
+            var app = builder.Build();
+            ConfigureMiddleware(app);
+
+            app.Run();
+        }
+
+        private static void ConfigureServices(WebApplicationBuilder builder)
+        {
+            // Controllers & Swagger
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<TaskManagementDbContext>(options=> options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // Database
+            builder.Services.AddDbContext<TaskManagementDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddScoped<ITaskRepository, TaskRepository>();
-            builder.Services.AddScoped<ITaskBL, TaskBL>();
-            builder.Services.AddScoped<ITaskService, TaskService>();
-
+            // AutoMapper
             builder.Services.AddAutoMapper(typeof(Program));
 
-            builder.Services.AddFirebaseAuthentication(builder.Configuration);
+            // Repositories
+            builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
+            // Business Logic
+            builder.Services.AddScoped<ITaskBL, TaskBL>();
+
+            // Query Services
+            builder.Services.AddScoped<ITaskService, TaskService>();
+
+            // Contextual services
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+        }
+
+        private static void ConfigureSwagger(WebApplicationBuilder builder)
+        {
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Tu API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Task Management API", Version = "v1" });
 
-                // Configura JWT Authentication
                 var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
                     Scheme = "bearer",
@@ -47,8 +70,7 @@ namespace ApiTaskManagement
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
-                    Description = "Introduce tu token JWT de Firebase con el formato: Bearer {tu token}",
-
+                    Description = "Provide your Firebase JWT token like: Bearer {token}",
                     Reference = new OpenApiReference
                     {
                         Id = JwtBearerDefaults.AuthenticationScheme,
@@ -57,20 +79,22 @@ namespace ApiTaskManagement
                 };
 
                 c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtSecurityScheme, Array.Empty<string>() }
-    });
+                {
+                    { jwtSecurityScheme, Array.Empty<string>() }
+                });
             });
+        }
 
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+        private static void ConfigureAuthentication(WebApplicationBuilder builder)
+        {
+            builder.Services.AddFirebaseAuthentication(builder.Configuration);
+        }
 
-            var app = builder.Build();
-
+        private static void ConfigureMiddleware(WebApplication app)
+        {
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-            
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -82,8 +106,6 @@ namespace ApiTaskManagement
             app.UseAuthorization();
 
             app.MapControllers();
-
-            app.Run();
         }
     }
 }
