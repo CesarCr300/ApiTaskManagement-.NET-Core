@@ -26,11 +26,12 @@ public class TaskController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] string? from, [FromQuery] string? end)
     {
-        var tasks = await _taskService.GetTasks();
+        var tasks = await _taskService.GetTasks(from, end);
         return Ok(ResponseHandler.Success(tasks));
     }
+
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
