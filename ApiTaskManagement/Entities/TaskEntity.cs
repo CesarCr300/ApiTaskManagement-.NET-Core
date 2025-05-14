@@ -25,7 +25,7 @@ public class TaskEntity
         if (task.StateId != StateId)
         {
             StateId = task.StateId;
-            if (StateId == 3) DateClose = DateTime.UtcNow;
+            if (StateId == TaskStateConstants.Done) DateClose = DateTime.UtcNow;
             else DateClose = null;
         }
 
