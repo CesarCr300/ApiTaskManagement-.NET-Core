@@ -1,4 +1,5 @@
 namespace ApiTaskManagement.Controllers;
+
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using ApiTaskManagement.BL.Interfaces;
 using ApiTaskManagement.DTOs;
 using ApiTaskManagement.Entities;
 using ApiTaskManagement.Utils;
+using ApiTaskManagement.Services.Interfaces;
 
 [Authorize]
 [ApiController]
@@ -13,25 +15,27 @@ using ApiTaskManagement.Utils;
 public class TaskController : ControllerBase
 {
     private readonly ITaskBL _taskBL;
+    private readonly ITaskService _taskService;
     private readonly IMapper _mapper;
 
-    public TaskController(ITaskBL taskBL, IMapper mapper)
+    public TaskController(ITaskBL taskBL,ITaskService taskService, IMapper mapper)
     {
         _taskBL = taskBL;
+        _taskService = taskService;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var tasks = await _taskBL.GetAllAsync();
+        var tasks = await _taskService.GetTasks();
         return Ok(ResponseHandler.Success(tasks));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var task = await _taskBL.GetByIdAsync(id);
+        var task = await _taskService.GetByIdAsync(id);
         if (task == null)
             return NotFound(ResponseHandler.Error("Task not found", 404));
 

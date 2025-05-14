@@ -9,24 +9,12 @@ namespace ApiTaskManagement.BL
     public class TaskBL : ITaskBL
     {
         private readonly ITaskRepository _repo;
-        private readonly ITaskService _service;
         private readonly ICurrentUserService _currentUser;
 
-        public TaskBL(ITaskRepository repo, ITaskService taskService, ICurrentUserService currentUserService)
+        public TaskBL(ITaskRepository repo, ICurrentUserService currentUserService)
         {
             _repo = repo;
-            _service = taskService;
             _currentUser = currentUserService;
-        }
-
-        public Task<IEnumerable<TaskResponseDTO>> GetAllAsync()
-        {
-            return _service.GetTasksByUserAsync(_currentUser.UserId);
-        }
-
-        public Task<TaskResponseDTO?> GetByIdAsync(int id)
-        {
-            return _service.GetByIdAsync(id, _currentUser.UserId);
         }
 
         public Task<bool> CreateAsync(TaskEntity task)
